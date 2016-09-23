@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+
+
+		<head>
+				<meta charset="UTF-8"/>
+				<style type="text/css">
+						canvas {
+							position: absolute;
+							margin: auto;
+							bottom: 0;
+							top: 0;
+							right: 0;
+							left: 0;
+						}
+				</style>
+		</head>
+
+		<body>
+					<script type="text/javascript">
+
+
+
+var canvas = document.createElement('canvas');
+canvas.width = 700; canvas.height = 900;
+var ktx = canvas.getContext('2d');
+document.body.appendChild(canvas);
+
+var cheatIn = document.createElement('input');
+cheatIn.placeholder = "Cheat";
+var cheatButt = document.createElement('input');
+cheatButt.type = "button";
+cheatButt.value = "✅";
+document.body.appendChild(cheatIn);
+document.body.appendChild(cheatButt);
+cheatButt.onclick = function () {
+		if (cheatIn.value == "collisionOFF")
+			player.col = false;
+
+		if (cheatIn.value == "collisionON")
+			player.col = true;
+}
+
+
+var keysDown =  new Array();
+addEventListener("keydown", function (e) {keysDown[e.keyCode] = true;});
+addEventListener("keyup", function (e) {delete keysDown[e.keyCode];});
+
+var bloky = new Array();
+var play = false;
+
+function loop() {
+	if (play) {
+		game.render();
+		game.checkAll();
+	}
+
+	checkPlay();
+	requestAnimationFrame(loop);
+}
+
+function checkPlay() {
+	if (32 in keysDown && play == false) {
+		play = true;
+	}
+	return;
+}
+var game = {
+
+	startGame: function() {
+		player.x =  50;		
+		player.y =  415;
+		player.i =  0;
+		ktx.fillStyle = "black";
+		ktx.fillRect(0, 0, canvas.width, canvas.height);
+		
+		ktx.fillStyle = "white";
+		ktx.font = "30px Verdana";
+		ktx.fillText("Space to START and JUMP", 150, 450);
+
+		bloky[0] = new blok(Math.random() * 10 + 1);
+
+		loop();	
+	},
+
+	checkAll: function() {
+		player.check();
+		return;
+	},
+
+	render: function() {
+		ktx.fillStyle = "black";
+		ktx.fillRect(0, 0, canvas.width, canvas.height);
+		for (var i = 0; i < bloky.length; i++) {
+			bloky[i].colise();
+			bloky[i].move();
+			bloky[i].render();
+		}
+		player.render();
+		
+		return;
+		
+	}
+
+};
+
+var player = {
+
+	x: 0,
+	y: 0,
+	i: 0,
+	score: 0,
+	scoreColor: "green",
+	col: true,
+
+	check: function() {
+		this.gravity();
+		this.jump();
+
+		return;
+	},
+	
+	gravity: function() {
+		if (this.y < 849) {
+			this.y += 7;
+		}
+		if (this.y < 0) {
+			this.y = 0;
+		}
+
+			
+		return;
+	},
+
+	jump: function() {
+		if (32 in keysDown) {
+			if (this.i < 15) {
+				this.y -= 20;
+				this.i++;
+			}
+		}
+		if (!(32 in keysDown)) {
+			this.i = 0;
+		}
+
+		return;
+	},
+
+	render: function() {
+		ktx.fillStyle = "white";
+		ktx.strokeStyle = this.scoreColor;
+		ktx.fillRect(this.x, this.y, 50, 50);
+		ktx.font = "70px Verdana";
+		ktx.lineWidth = 3;
+		ktx.strokeText(this.score, 20, 80);
+
+		return;
+	}
+
+
+};
+
+
+
+var blok = function(cloneRand) {
+
+	this.x =  780;
+	this.rand = (Math.random() * 10) + 1;
+	this.clone = false;
+	this.jAdd = true;
+
+
+	this.render = function() {
+		ktx.fillStyle = "white";
+		if (cloneRand <= 5) {
+			ktx.fillRect(this.x, 0, 60, 450);
+			ktx.fillRect(this.x, 700, 60, 200);
+		}else {
+			ktx.fillRect(this.x, 0, 60, 200);
+			ktx.fillRect(this.x, 450, 60, 450);
+		}
+
+		return;
+	};
+
+	this.move = function() {
+		if (this.x < 300 && this.clone == false) {
+			bloky[bloky.length] = new blok(this.rand);
+			this.clone = true;
+		}
+		if ( !(this.x < (-80)) ) {
+			this.x -= 2;
+		}
+
+		return;
+	};
+
+	this.colise = function() {
+		if (cloneRand <= 5) 
+		{
+				if (50+player.x > this.x && player.x < this.x+60 && player.y < 450) {
+					end();	
+				}
+				else if (50+player.x > this.x && player.x < this.x+60 && player.y > 650) {
+					end();
+				}
+
+		}
+		else
+		{
+				if (50+player.x > this.x && player.x < this.x+60 && player.y < 200) {
+					end();	
+				}
+				else if (50+player.x > this.x && player.x < this.x+60 && player.y > 400) {
+					end();
+				}
+		}
+		if (this.x < 30) {
+			if (this.jAdd) {
+				player.score++;
+				this.jAdd = false;
+			}
+			
+			
+		}
+
+		return;
+	}
+
+};
+
+function end() {
+	if (player.col) {
+		location.reload();
+	}
+}
+
+
+game.startGame();
+
+					</script>
+		</body>
+
+
+</html>
